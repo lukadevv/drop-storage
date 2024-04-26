@@ -1,7 +1,10 @@
 import {
   BadRequestException,
   Controller,
+  Delete,
+  Logger,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,6 +17,7 @@ import {
   UploadOptions,
   UploadedFiles,
 } from '@blazity/nest-file-fastify';
+import * as fs from 'fs';
 
 /**
  * Controller for file actions
@@ -57,6 +61,29 @@ export class FileController {
     }),
   )
   async uploadFiles(@UploadedFiles() files: MemoryStorageFile[]) {
-    return files.map((each: any) => each?.path?.replaceAll('\\', '/'));
+    return files.map(
+      (each: any) =>
+        each?.path?.replaceAll('\\', '/').replaceAll('volumes/', ''),
+    );
+  }
+
+  @Delete('/delete*')
+  async deleteFile(@Req() req: Request) {
+    const extractedFile = req.url.replace('/file/delete', '');
+    if (!req) {
+      throw new BadRequestException();
+    }
+
+    const finalPath = `./volumes/${extractedFile}`;
+
+    if (!fs.existsSync(finalPath)) {
+      throw new BadRequestException();
+    }
+
+    fs.rm(finalPath, () =>
+      Logger.log(`Delete file from "${extractedFile}" successfully!`),
+    );
+
+    return `Delete file from "${extractedFile}" successfully!`;
   }
 }
