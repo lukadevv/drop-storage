@@ -15,7 +15,12 @@ async function bootstrap() {
   );
   const config = app.get<ConfigService>(ConfigService);
 
-  await app.register(fastifyMultipart);
+  await app.register(fastifyMultipart, {
+    limits: {
+      files: 10,
+      fileSize: 10000000,
+    },
+  });
 
   app.useStaticAssets({
     root: join(__dirname, '..', 'volumes'),

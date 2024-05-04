@@ -25,6 +25,7 @@ import * as fs from 'fs';
 @Controller('file')
 @UseGuards(AuthGuard)
 export class FileController {
+  private static LOGGER = new Logger();
   /**
    * Upload files via this endpoint
    *
@@ -61,12 +62,21 @@ export class FileController {
     }),
   )
   async uploadFiles(@UploadedFiles() files: MemoryStorageFile[]) {
-    return files.map(
+    const paths = files.map(
       (each: any) =>
         each?.path?.replaceAll('\\', '/').replaceAll('volumes/', ''),
     );
+
+    paths.forEach((path) =>
+      FileController.LOGGER.log(`A file was created in path "${path}"`),
+    );
+
+    return paths;
   }
 
+  /**
+   * Delete a file from storage
+   */
   @Delete('/delete*')
   async deleteFile(@Req() req: Request) {
     const extractedFile = req.url.replace('/file/delete', '');
@@ -81,7 +91,9 @@ export class FileController {
     }
 
     fs.rm(finalPath, () =>
-      Logger.log(`Delete file from "${extractedFile}" successfully!`),
+      FileController.LOGGER.log(
+        `Delete file from "${extractedFile}" successfully!`,
+      ),
     );
 
     return `Delete file from "${extractedFile}" successfully!`;
