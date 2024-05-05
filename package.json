@@ -1,6 +1,6 @@
 {
   "name": "drop-storage",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NestJS fastify file drop storage server",
   "author": "luka",
   "private": true,
